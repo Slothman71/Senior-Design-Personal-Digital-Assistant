@@ -7,5 +7,8 @@ contextBridge.exposeInMainWorld('versions', {
 })
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  closeApp: () => ipcRenderer.send('close-app')
+  closeApp: () => ipcRenderer.send('close-app'),
+
+  //asks main process to create a new child window 
+  openChildWindow: () => ipcRenderer.invoke('open-child-window')
 })

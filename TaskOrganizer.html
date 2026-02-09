@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Task Organizer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            width: 350px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .ListOfTasks {
+            background: gray;
+            padding: 20px;
+            width: 350px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        input {
+            width: 75%;
+            padding: 8px;
+        }
+
+        button {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+
+        ul {
+            background: darkslategray;
+            list-style: none;
+            padding: 0;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+
+        li {
+            background: beige;
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Task Organizer</h1>
+
+    <a href= "index.html">Homepage</a> <!-- link to homepage -->
+
+    <input type="text" id="taskInput" placeholder="Enter a task"> <!-- user input box -->
+    <button onclick="addTask()">Add</button> <!-- button runs "addTask" -->
+
+    
+</div>
+    
+<div class="ListOfTasks">
+    <h1>List of Tasks</h1>
+    <ul id="taskList"></ul> <!-- where the tasks end up -->
+
+</div>
+
+<script>
+    function addTask() {
+        const input = document.getElementById("taskInput"); // gets the task inputted by user
+        const taskText = input.value.trim(); // the contents of "taskText" IS what the user inputted
+
+        if (taskText === "") {
+            alert("Please enter a task!"); // if button is clicked without anything being in there, an alert is made to the user
+            return;
+        }
+
+        const li = document.createElement("li"); // creates list element
+        li.textContent = taskText; // fills fresh list element with the contents of taskText
+
+        document.getElementById("taskList").appendChild(li) // task is put in list
+        input.value = ""; // changes the box back to default when task is put in list
+    }
+</script>
+
+</body>
+</html>

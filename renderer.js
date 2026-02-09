@@ -8,4 +8,22 @@ function setupCloseButton() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', setupCloseButton);
+//Handles open child window button clicj
+function setupChildButton(){
+  //grabs button from HTML
+  const childButton = document.getElementById('open-child-button');
+
+  //attach listener if button exists
+  if (childButton){
+    childButton.addEventListener('click', () => {
+      //asks main process to create a child window
+      window.electronAPI.openChildWindow();
+    })
+  }
+}
+
+//wait until the page loads before attaching buttons
+document.addEventListener('DOMContentLoaded', () => {
+  setupCloseButton(); // initialize close button
+  setupChildButton(); //initialize child button
+});
