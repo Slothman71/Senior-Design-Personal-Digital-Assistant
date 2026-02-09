@@ -11,12 +11,31 @@
       http-equiv="X-Content-Security-Policy"
       content="default-src 'self'; script-src 'self'"
     />
-    <title>Hello from Electron renderer!</title>
+    <title>Super Cool Awesome Swag App</title>
+
+<style>
+  .LinkButton {
+    text-align: center;
+    padding: 8px;
+    border: 2px outset skyblue;
+    border-radius: 10px;
+    color: gray;
+    background-color: beige;
+  }
+</style>
+
   </head>
+
+  <!-- Page Header -->
   <body>
-    <h1>Welcome to the App!</h1>
+    <h1>Welcome to the Super Productivity App!</h1>
     <button id="close-button">Close Application</button>
 
+    <a href= "TaskOrganizer.html"><button class="LinkButton" id="open-TaskOrganizer-button">TaskOrganizer</button></a>
+    
+     <!--button to open child window-->
+    <a href= "child.html"><button id="open-child-button">Calendar</button></a> 
+  
     <script src="./renderer.js"></script>
   </body>
 </html>
