@@ -1,41 +1,32 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'"
-    />
-    <meta
-      http-equiv="X-Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'"
-    />
-    <title>Super Cool Awesome Swag App</title>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'">
+<title>Super Cool Awesome Swag App</title>
+  
+<link rel="stylesheet" href="styles.css">
 
-<style>
-  .LinkButton {
-    text-align: center;
-    padding: 8px;
-    border: 2px outset skyblue;
-    border-radius: 10px;
-    color: gray;
-    background-color: beige;
-  }
-</style>
+</head>
 
-  </head>
-
-  <!-- Page Header -->
-  <body>
-    <h1>Welcome to the Super Productivity App!</h1>
-    <button id="close-button">Close Application</button>
-
-    <a href= "TaskOrganizer.html"><button class="LinkButton" id="open-TaskOrganizer-button">TaskOrganizer</button></a>
+<!-- Page Header -->
+<body>
+  <div class="container">
+    <h1>Welcome to the Multipurpose Personal Assistant!</h1>
+      
+    <div class="button-row">
+    <a href= "TaskOrganizer.html"><button class="btn-large primary" id="open-TaskOrganizer-button">TaskOrganizer</button></a>
     
-     <!--button to open child window-->
-    <a href= "child.html"><button id="open-child-button">Calendar</button></a> 
+    <!--button to open child window-->
+    <a href= "child.html"><button class="btn-large primary" id="open-child-button">Calendar</button></a>
+    </div>
+
+    <button class="btn-small" id="close-button">Close Application</button>
   
     <script src="./renderer.js"></script>
-  </body>
+  </div>
+</body>
 </html>
