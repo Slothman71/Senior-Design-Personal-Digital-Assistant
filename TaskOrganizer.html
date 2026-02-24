@@ -4,19 +4,26 @@
     <meta charset="UTF-8">
     <title>Task Organizer</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!--<link rel="stylesheet" href="styles.css"> -->
-    
+
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            font-family: Arial;
+            max-width: 1000px;
+            margin: 40px auto;
         }
 
-        .container {
+        li {
+            background: beige;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        .TaskInputContainer {
             background: white;
             padding: 20px;
             width: 350px;
@@ -27,76 +34,157 @@
         .ListOfTasks {
             background: gray;
             padding: 20px;
+            margin-top: 10px;
             width: 350px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
 
-        h1 {
-            text-align: center;
+        .completed {
+            text-decoration: line-through;
+            color: gray;
+            background-color: #e3ffdd;
+            border: 1px solid green;
         }
 
-        input {
-            width: 75%;
-            padding: 8px;
+        .overdue {
+            background-color: #ffdddd;
+            border: 1px solid red;
+        }
+
+        .due-today {
+        background-color: #fff3cd;
+        border: 1px solid orange;
         }
 
         button {
-            padding: 8px 12px;
-            cursor: pointer;
-        }
-
-        ul {
-            background: darkslategray;
-            list-style: none;
-            padding: 0;
-            border-radius: 4px;
-            margin-top: 15px;
-        }
-
-        li {
-            background: beige;
-            padding: 8px;
-            margin-bottom: 5px;
-            border-radius: 10px;
+            margin-left: 8px;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Task Organizer</h1>
+<a href= "index.html">Homepage</a> <!-- link to homepage -->
 
-    <a href= "index.html">Homepage</a> <!-- link to homepage -->
+<div class="TaskInputContainer">
+    <h2>Task Organizer</h2>
 
-    <input type="text" id="taskInput" placeholder="Enter a task"> <!-- user input box -->
-    <button onclick="addTask()">Add</button> <!-- button runs "addTask" -->
+    <input type="text" id="taskInput" placeholder="Enter task"> <!-- user input box for task -->
+    <input type="datetime-local" id="dateInput"> <!-- user input box for date -->
+    <button onclick="addTask()">Add Task</button> <!-- button runs "addTask" -->
+    <button onclick="toggleSort()">Toggle Sort (Asc/Desc)</button> <!-- button toggle sort asc/desc -->
 
-    
 </div>
-    
-<div class="ListOfTasks">
-    <h1>List of Tasks</h1>
-    <ul id="taskList"></ul> <!-- where the tasks end up -->
 
+<div class="ListOfTasks">
+    <h2>List of Tasks</h2>
+    <ul id="taskList"></ul> <!-- where the tasks end up -->
 </div>
 
 <script>
-    function addTask() {
-        const input = document.getElementById("taskInput"); // gets the task inputted by user
-        const taskText = input.value.trim(); // the contents of "taskText" IS what the user inputted
 
-        if (taskText === "") {
-            alert("Please enter a task!"); // if button is clicked without anything being in there, an alert is made to the user
-            return;
+// start with an empty task array and togglesort set to ascending.
+let tasks = [];
+let ascending = true;
+
+function addTask() {
+    const text = document.getElementById("taskInput").value; // gets the task inputted by user
+    const date = document.getElementById("dateInput").value; // gets the date inputted by user
+
+    if (text === "" || date === "") {
+        alert("Please enter task and date");
+        return;
+    } // if text OR date field are empty, user is told to do it correctly
+
+    tasks.push({
+        text: text,
+        date: date,
+        completed: false
+    });
+
+    sortTasks(); // function sort
+    displayTasks(); // function display
+
+    document.getElementById("taskInput").value = "";
+    document.getElementById("dateInput").value = "";
+}
+
+function sortTasks() {
+    tasks.sort((a, b) => {
+        if (ascending) {
+            return new Date(a.date) - new Date(b.date);
+        } else {
+            return new Date(b.date) - new Date(a.date);
+        }
+    });
+} // code to sort the tasks
+
+function toggleSort() {
+    ascending = !ascending; // asc = not asc
+    sortTasks();
+    displayTasks();
+} // this function toggles ascending with descending
+
+
+function displayTasks() { // there are a lot of things in this function that are explained in-line
+    const list = document.getElementById("taskList");
+    list.innerHTML = "";
+
+    const now = new Date();
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    tasks.forEach((task, index) => { //specifics per task
+
+        const li = document.createElement("li"); // create list element
+
+        const taskDate = new Date(task.date); //create taskDate 
+
+        const taskDay = new Date(taskDate); //create taskDay from taskDate
+        taskDay.setHours(0,0,0,0); //sets hours for the taskDay
+
+
+        // Highlight overdue (past exact time)
+        if (taskDate < now && !task.completed) {
+            li.classList.add("overdue");
         }
 
-        const li = document.createElement("li"); // creates list element
-        li.textContent = taskText; // fills fresh list element with the contents of taskText
+        // Highlight Due today (same day but future time)
+        else if (taskDay.getTime() === today.getTime() && !task.completed) {
+            li.classList.add("due-today");
+        }
 
-        document.getElementById("taskList").appendChild(li) // task is put in list
-        input.value = ""; // changes the box back to default when task is put in list
-    }
+        // Mark complete
+        if (task.completed) {
+            li.classList.add("completed");
+        }
+
+        li.textContent = task.text + " (Due: " + taskDate.toLocaleString() + ")";
+        // shows due date in-line with task
+
+        // Complete button
+        const completeBtn = document.createElement("button");
+        completeBtn.textContent = "Complete";
+        completeBtn.onclick = () => {
+            tasks[index].completed = !tasks[index].completed;
+            displayTasks();
+        };
+
+        // Delete button
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Delete";
+        deleteBtn.onclick = () => {
+            tasks.splice(index, 1);
+            displayTasks();
+        };
+
+        li.appendChild(completeBtn);
+        li.appendChild(deleteBtn);
+
+        list.appendChild(li);
+    });
+}
+
 </script>
 
 </body>
