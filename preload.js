@@ -12,3 +12,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   //asks main process to create a new child window 
   openChildWindow: () => ipcRenderer.invoke('open-child-window')
 })
+
+contextBridge.exposeInMainWorld('databaseAPI', {
+  getItems: () => ipcRenderer.invoke('db:get-items'),
+  addItem: (item) => ipcRenderer.invoke('db:add-item', item)
+});
