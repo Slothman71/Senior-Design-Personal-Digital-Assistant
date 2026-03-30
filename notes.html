@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Notes</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      display: flex;
+      height: 100vh;
+    }
+
+    .container {
+      display: flex;
+      width: 100%;
+    }
+
+   
+    .editor {
+      width: 40%;
+      padding: 20px;
+      border-right: 2px solid #ddd;
+    }
+
+    input, textarea {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 8px;
+    }
+
+    textarea {
+      height: 200px;
+    }
+
+    
+    .notes-list {
+      width: 60%;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .note-card {
+      background: beige;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+    }
+
+    .note-title {
+      font-weight: bold;
+    }
+
+    .note-buttons {
+      margin-top: 8px;
+    }
+
+    button {
+      margin-right: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+ 
+  <div class="editor">
+    <a href="index.html">← Back</a>
+    <h2>Notes</h2>
+
+    <input id="noteTitle" placeholder="Title">
+    <textarea id="noteContent" placeholder="Write your note..."></textarea>
+
+    <button onclick="saveNote()">Save</button>
+    <button onclick="clearInputs()">Clear</button>
+  </div>
+
+  
+  <div class="notes-list">
+    <h3>Your Notes</h3>
+    <div id="notesContainer"></div>
+  </div>
+
+</div>
+
+<script src="notes.js"></script>
+
+</body>
+</html>
