@@ -71,8 +71,10 @@
 
     <input type="text" id="taskInput" placeholder="Enter task"> <!-- user input box for task -->
     <input type="datetime-local" id="dateInput"> <!-- user input box for date -->
+    <input type="number" id="priorityInput" min="1" max="10" placeholder="Priority (1-10)"> <!-- user input for priority importance-->
     <button onclick="addTask()">Add Task</button> <!-- button runs "addTask" -->
     <button onclick="toggleSort()">Toggle Sort (Asc/Desc)</button> <!-- button toggle sort asc/desc -->
+    <button onclick="toggleSortMode()">Sort By: Date</button> <!--changes the mode in which its being sorted-->
 
 </div>
 
@@ -86,44 +88,87 @@
 // start with an empty task array and togglesort set to ascending.
 let tasks = [];
 let ascending = true;
+let sortMode = "date"; // "date" or "priority"
 
 function addTask() {
     const text = document.getElementById("taskInput").value; // gets the task inputted by user
     const date = document.getElementById("dateInput").value; // gets the date inputted by user
+    const priority = document.getElementById("priorityInput").value;
 
-    if (text === "" || date === "") {
-        alert("Please enter task and date");
+
+    if (text === "" || date === "" || priority === "") {
+        alert("Please enter task, date, and priority");
         return;
-    } // if text OR date field are empty, user is told to do it correctly
+    } // if text, date, OR priority field are empty, user is told to do it correctly
 
     tasks.push({
         text: text,
         date: date,
+        priority: parseInt(priority),
         completed: false
     });
 
+    saveTasks(); // saves the tasks
     sortTasks(); // function sort
     displayTasks(); // function display
 
     document.getElementById("taskInput").value = "";
     document.getElementById("dateInput").value = "";
+    document.getElementById("priorityInput").value = "";
 }
 
 function sortTasks() {
     tasks.sort((a, b) => {
-        if (ascending) {
-            return new Date(a.date) - new Date(b.date);
+
+        let comparison;
+
+        if (sortMode === "date") {
+            comparison = new Date(a.date) - new Date(b.date);
         } else {
-            return new Date(b.date) - new Date(a.date);
+            comparison = a.priority - b.priority;
         }
+
+        return ascending ? comparison : -comparison;
     });
 } // code to sort the tasks
+
+// changes the sort mode
+function toggleSortMode() {
+    const button = event.target;
+
+    if (sortMode === "date") {
+        sortMode = "priority";
+        button.textContent = "Sort By: Priority";
+    } else {
+        sortMode = "date";
+        button.textContent = "Sort By: Date";
+    }
+
+    sortTasks();
+    displayTasks();
+}
 
 function toggleSort() {
     ascending = !ascending; // asc = not asc
     sortTasks();
     displayTasks();
 } // this function toggles ascending with descending
+
+
+function saveTasks() {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+function loadTasks() {
+    const storedTasks = localStorage.getItem("tasks");
+
+    if (storedTasks) {
+        tasks = JSON.parse(storedTasks);
+    }
+
+    sortTasks();
+    displayTasks();
+}
 
 
 function displayTasks() { // there are a lot of things in this function that are explained in-line
@@ -159,14 +204,17 @@ function displayTasks() { // there are a lot of things in this function that are
             li.classList.add("completed");
         }
 
-        li.textContent = task.text + " (Due: " + taskDate.toLocaleString() + ")";
-        // shows due date in-line with task
+        li.textContent = task.text + 
+                        " | Priority: " + task.priority +
+                        " | Due: " + taskDate.toLocaleString();
+        // shows priority and due date in-line with task
 
         // Complete button
         const completeBtn = document.createElement("button");
         completeBtn.textContent = "Complete";
         completeBtn.onclick = () => {
             tasks[index].completed = !tasks[index].completed;
+            saveTasks();
             displayTasks();
         };
 
@@ -175,6 +223,7 @@ function displayTasks() { // there are a lot of things in this function that are
         deleteBtn.textContent = "Delete";
         deleteBtn.onclick = () => {
             tasks.splice(index, 1);
+            saveTasks();
             displayTasks();
         };
 
@@ -184,6 +233,8 @@ function displayTasks() { // there are a lot of things in this function that are
         list.appendChild(li);
     });
 }
+
+window.onload = loadTasks;
 
 </script>
 
