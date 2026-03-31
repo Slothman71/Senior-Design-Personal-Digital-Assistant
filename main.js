@@ -1,5 +1,8 @@
 const { app, BrowserWindow, ipcMain } = require('electron/main')
 const path = require('path')
+const Database = require('better-sqlite3');
+
+let db;
 
 const createWindow = () => {
   const win = new BrowserWindow({
@@ -42,6 +45,37 @@ function createChildWindow(parentwin) {
 }
 
 app.whenReady().then(() => {
+  const dbPath = path.join(app.getPath('userData'), 'app.db');
+  db = new Database(dbPath);
+  // Creates a table if it doesn't exist
+  db.prepare(`
+    CREATE TABLE IF NOT EXISTS items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      quantity INTEGER NOT NULL
+    )
+  `).run();
+
+  // IPC handlers
+  ipcMain.handle('db:get-items', () => {
+    return db.prepare('SELECT * FROM items ORDER BY id DESC').all();
+  });
+
+  ipcMain.handle('db:add-item', (event, item) => {
+    const stmt = db.prepare(`
+      INSERT INTO items (name, quantity)
+      VALUES (?, ?)
+    `);
+
+    const result = stmt.run(item.name, item.quantity);
+
+    return {
+      id: result.lastInsertRowid,
+      name: item.name,
+      quantity: item.quantity
+    };
+  });
+
   createWindow()
 
   app.on('activate', () => {
@@ -68,3 +102,7 @@ ipcMain.handle('open-child-window', (event) => {    //handles renderer request t
   }
   return true
 })
+
+app.on('before-quit', () => {
+  if (db) db.close();
+});
