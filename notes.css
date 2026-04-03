@@ -1,0 +1,79 @@
+.notes-layout {
+    display: flex;
+    width: 100%;
+    height: 80vh;
+    gap: 20px;
+}
+
+.notes-input {
+    width: 40%;
+    background-color: #1e293b;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.notes-list {
+    width: 60%;
+    background-color: #1e293b;
+    padding: 20px;
+    border-radius: 12px;
+    overflow-y: auto;
+}
+
+.notes-input input,
+.notes-input textarea {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+}
+
+.notes-input textarea {
+    height: 150px;
+}
+
+.note-card {
+    background-color: #334155;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.note-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.note-buttons {
+    margin-top: 8px;
+}
+
+.note-buttons button {
+    margin-right: 5px;
+}
+.back-btn-container {
+    margin-bottom: 15px;
+}
+
+.back-btn {
+    background-color: #3b82f6;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+
+.back-btn:hover {
+    transform: scale(1.08);
+    filter: brightness(1.2); 
+}
+
+.back-btn:active {
+    transform: scale(1.0);
+}

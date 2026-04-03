@@ -11,27 +11,22 @@ const createWindow = () => {
     fullscreen: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-
-      //seperates web app from internal Electron code
       contextIsolation: true,
-      nodeIntegration: false  //Removes direct system access from our HTML page
+      nodeIntegration: false
     }
   })
 
   win.loadFile('index.html')
-
   return win
 }
 
-//Child window --> Each child window gets its own renderer process (multiple tabs)
-function createChildWindow(parentwin) {
-
+/* FIXED PARAM NAME */
+function createChildWindow(parentWin) {
   const child = new BrowserWindow({
-    parent: parentWin,    //makes it a child of the parent
-    modal:false,          //if set to true it prevents action on parent window until some task is completed
+    parent: parentWin,
+    modal: false,
     width: 500,
     height: 400,
-
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -39,15 +34,13 @@ function createChildWindow(parentwin) {
     }
   })
 
-  //loads a different page for the chidl processes
   child.loadFile('child.html')
-
 }
 
 app.whenReady().then(() => {
   const dbPath = path.join(app.getPath('userData'), 'app.db');
   db = new Database(dbPath);
-  // Creates a table if it doesn't exist
+
   db.prepare(`
     CREATE TABLE IF NOT EXISTS items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -56,7 +49,6 @@ app.whenReady().then(() => {
     )
   `).run();
 
-  // IPC handlers
   ipcMain.handle('db:get-items', () => {
     return db.prepare('SELECT * FROM items ORDER BY id DESC').all();
   });
@@ -91,14 +83,15 @@ app.on('window-all-closed', () => {
   }
 })
 
+
 ipcMain.on('close-app', () => {
-  BrowserWindow.getFocusedWindow()?.close()
+  app.quit();
 })
 
-ipcMain.handle('open-child-window', (event) => {    //handles renderer request to open child window
-  const parentWin = BrowserWindow.fromWebContents(event.sender) //finds which window made request
-  if (parentWin) {            //if parent window is found
-    createChildWindow(parentWin)    //create + attach child window to it
+ipcMain.handle('open-child-window', (event) => {
+  const parentWin = BrowserWindow.fromWebContents(event.sender)
+  if (parentWin) {
+    createChildWindow(parentWin)
   }
   return true
 })

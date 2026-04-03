@@ -1,18 +1,52 @@
 <!DOCTYPE html>
 <html lang="en-US">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name ="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Notes App</title>
-        <link rel="stylesheet" href="styles.css">
-    </head>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notes App</title>
 
-    <div class="container">
-        <header class="header">
-            <h1>Notes App</h1>
-            <p>Text TBD</p>
-        </header>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="notes.css">
+</head>
+
+<body>
+
+<div class="container" style="width:100%; max-width:1200px;">
+
+    <header class="header">
+        <h1>Notes App</h1>
+    </header>
+    
+    <div class="back-btn-container">
+    <a href="index.html">
+        <button class="back-btn">← Back to Home</button>
+    </a>
+</div>
+
+    <div class="notes-layout">
+
+      
+        <div class="notes-input">
+            <h2>Add Note</h2>
+
+            <input id="noteTitle" placeholder="Title" />
+            <textarea id="noteContent" placeholder="Write your note..."></textarea>
+
+            <button class="btn-small primary" onclick="saveNote()">Save</button>
+            <button class="btn-small secondary" onclick="clearInputs()">Clear</button>
+        </div>
 
         
+        <div class="notes-list">
+            <h2>Your Notes</h2>
+            <div id="notesContainer"></div>
+        </div>
+
     </div>
+
+</div>
+
+<script src="notes.js"></script>
+
+</body>
 </html>

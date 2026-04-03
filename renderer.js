@@ -1,6 +1,8 @@
 async function loadItems() {
-  const items = await window.databaseAPI.getItems();
   const list = document.getElementById('items');
+  if (!list || !window.databaseAPI) return;
+
+  const items = await window.databaseAPI.getItems();
   list.innerHTML = '';
 
   for (const item of items) {
@@ -10,48 +12,52 @@ async function loadItems() {
   }
 }
 
-document.getElementById('addForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
 
-  const name = document.getElementById('name').value.trim();
-  const quantity = Number(document.getElementById('quantity').value);
+const form = document.getElementById('addForm');
+if (form && window.databaseAPI) {
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-  if (!name || Number.isNaN(quantity)) return;
+    const nameEl = document.getElementById('name');
+    const qtyEl = document.getElementById('quantity');
 
-  await window.databaseAPI.addItem({ name, quantity });
+    if (!nameEl || !qtyEl) return;
 
-  e.target.reset();
-  loadItems();
-});
+    const name = nameEl.value.trim();
+    const quantity = Number(qtyEl.value);
 
-loadItems();
+    if (!name || Number.isNaN(quantity)) return;
 
+    await window.databaseAPI.addItem({ name, quantity });
+
+    e.target.reset();
+    loadItems();
+  });
+}
+
+/* CLOSE BUTTON */
 function setupCloseButton() {
   const closeButton = document.getElementById('close-button');
   if (closeButton) {
     closeButton.addEventListener('click', () => {
-      // Calls the function exposed via contextBridge in the preload script
       window.electronAPI.closeApp();
     });
   }
 }
 
-//Handles open child window button clicj
-function setupChildButton(){
-  //grabs button from HTML
+/* CHILD WINDOW BUTTON */
+function setupChildButton() {
   const childButton = document.getElementById('open-child-button');
-
-  //attach listener if button exists
-  if (childButton){
+  if (childButton) {
     childButton.addEventListener('click', () => {
-      //asks main process to create a child window
       window.electronAPI.openChildWindow();
-    })
+    });
   }
 }
 
-//wait until the page loads before attaching buttons
+/* RUN AFTER LOAD */
 document.addEventListener('DOMContentLoaded', () => {
-  setupCloseButton(); // initialize close button
-  setupChildButton(); //initialize child button
+  setupCloseButton();
+  setupChildButton();
+  loadItems();
 });
