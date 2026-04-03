@@ -175,7 +175,7 @@
     <div class="TaskInputContainer">
         <h2>Add New Task</h2>
         <input type="text" id="taskInput" placeholder="What needs to be done?">
-        <input type="datetime-local" id="dateInput">
+        <input type="datetime-local" max="9999-12-31T23:59" id="dateInput">
         <input type="number" id="priorityInput" min="1" max="10" placeholder="Priority (1-10)">
         
         <button onclick="addTask()">Add Task</button>
