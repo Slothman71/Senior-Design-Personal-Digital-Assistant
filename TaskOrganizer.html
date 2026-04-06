@@ -165,6 +165,96 @@
         .tab-btn:hover:not(.active) {
             background-color: #f0f0f0;
         }
+
+        /* I have added my name to each specific change that was made for easier refactoring/ if something breaks */
+
+        /* Luaiy Nawabit - Daily quest summary card I made sure to style it the same as the rest of the page */
+        .quest-panel {
+            display: none;
+            background: #f8fbff;
+            border: 1px solid #dbeafe;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        /* Luaiy Nawabit - Cute and petite responsive layout for quest stats so it stays readable on different screen sizes */
+        .quest-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* Luaiy Nawabit - Reusable stat box styling for points/ levels/ daily quest stuff */
+        .quest-stat-box {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Luaiy Nawabit - Makes the point total stand out more */
+        .points-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        /* Luaiy Nawabit - Same bold used for the level number */
+        .level-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--success);
+        }
+
+        /* Luaiy Nawabit - Used for the title label under the level display */
+        .level-title {
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* Luaiy Nawabit - Smaller helper text under the stay boxes */
+        .quest-note {
+            font-size: 13px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        /* Luaiy Nawabit - "Untoucnable" disabled state for the reroll button */
+        .reroll-btn:disabled {
+            background-color: #b8c7db;
+            cursor: not-allowed;
+            filter: none;
+        }
+
+        /* Luaiy Nawabit - Shows how many points and xp each quest gives */
+        .quest-rewards {
+            color: var(--accent);
+            font-weight: 600;
+            margin-top: 6px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        /* Luaiy Nawabit - Simple progress bar container for xp */
+        .xp-bar-container {
+            width: 100%;
+            height: 12px;
+            background: #e5e7eb;
+            border-radius: 999px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        /* Luaiy Nawabit - Filled portion of the xp bar */
+        .xp-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #2ecc71, #3b82f6);
+            transition: width 0.3s ease;
+        }
     </style>
 </head>
 <body>
@@ -181,20 +271,65 @@
         <button onclick="addTask()">Add Task</button>
         <div style="display:flex; gap:10px;">
             <button onclick="toggleSort()">Change Sort Asc/Desc</button>
-            <button onclick="toggleSortMode()" id="modeBtn">Sort By: Date</button>
+            <button onclick="toggleSortMode(this)" id="modeBtn">Sort By: Date</button>
         </div>
     </div>
 
     <div class="ListOfTasks">
         <div class="tab-container">
             <button class="tab-btn active" id="tabActive" onclick="switchTab('active')">Your Tasks</button>
+            <button class="tab-btn" id="tabDaily" onclick="switchTab('daily')">Daily Quests</button>
             <button class="tab-btn" id="tabArchive" onclick="switchTab('archive')">Archive</button>
         </div>
+
+        <div class="quest-panel" id="questPanel">
+            <div class="quest-stats">
+                <div class="quest-stat-box">
+                    <div>Points</div>
+                    <div class="points-number" id="pointsDisplay">0</div>
+                    <div class="quest-note">Spend points on rerolling one unfinished quest.</div>
+                </div>
+
+                <div class="quest-stat-box">
+                    <div>Level</div>
+                    <div class="level-number" id="levelDisplay">1</div>
+                    <div class="level-title" id="levelTitleDisplay">Beginner</div>
+                    <div class="quest-note" id="xpTextDisplay">0 / 100 XP</div>
+                    <div class="xp-bar-container">
+                        <div class="xp-bar-fill" id="xpBarFill"></div>
+                    </div>
+                </div>
+
+                <div class="quest-stat-box">
+                    <div>Today's Bonus</div>
+                    <div id="bonusStatus">Complete all 3 quests for +25 points and +50 XP</div>
+                    <div class="quest-note" id="questProgressText">0 / 3 quests completed today</div>
+                </div>
+
+                <div class="quest-stat-box">
+                    <div>Reroll</div>
+                    <button class="reroll-btn" id="rerollBtn" onclick="rerollDailyQuest()">Reroll 1 Quest (-15 points)</button>
+                    <div class="quest-note" id="rerollNote">Replace one unfinished daily quest.</div>
+                    <div class="quest-note" id="nextResetTimer">Next refresh in: --:--:--</div>
+                </div>
+            </div>
+        </div>
+
         <ul id="taskList"></ul>
     </div>
 </div>
 
 <script>
+
+// Luaiy Nawabit: Friday April 3rd - Sunday April 7th 2026
+/*  
+  - Added Daily Quests tab within the Task Organizer
+  - Ensured daily quests stay fixed for the current day and only refresh on a new day ORRR if a quest task gets deleted
+  - Added a points system/ reroll system, bonus for doing all 3 tasks, xp system + levelling, and ranked titles
+  - Levelling uses increasing XP requirements i.e. each level takes more effort than the last one
+  - Titles use level ranges instead of one title per level so the system can keep working even if levels go super high
+  - Everything still uses localStorage for now so it fits the current version of the app without needing SQLite yet (sorry Will :P)
+*/
 
 let currentView = 'active'; // Tracks whether we see 'active' or 'archive'
 
@@ -202,12 +337,117 @@ let tasks = [];
 let ascending = true;
 let sortMode = "date"; // "date" or "priority"
 
+// Luaiy Nawabit - Separating localStorage keys makes the different systems easier to manage and debug later
+const TASKS_STORAGE_KEY = "tasks";
+const DAILY_QUESTS_STORAGE_KEY = "dailyQuests";
+const QUEST_POINTS_STORAGE_KEY = "questPoints";
+const QUEST_XP_STORAGE_KEY = "questXPData";
+
+// Luaiy Nawabit - Main settings for daily quests and rewards.
+const DAILY_QUEST_COUNT = 3;
+const DAILY_REROLL_COST = 15;
+const DAILY_FULL_CLEAR_BONUS_POINTS = 25;
+const DAILY_FULL_CLEAR_BONUS_XP = 50;
+
+// Luaiy Nawabit - The user's spendable quest points
+let questPoints = 0;
+
+// Luaiy Nawabit - Xp data is split up so the app can show total XP, current level, and progress to the next level.
+let questXPData = {
+    level: 1,
+    currentXP: 0,
+    totalXP: 0
+};
+
+// Luaiy Nawabit - Stores the current day's generated quests and whether the daily bonus was already awarded to player .
+let dailyQuestData = {
+    date: "",
+    quests: [],
+    bonusAwarded: false
+};
+
+// Luaiy Nawabit - Keeps track of the timer interval so only one reset timer runs at once.
+let dailyResetTimerInterval = null;
+
+// Luaiy Nawabit - Uses the local date daily reset happens at the user's actual midnight.
+function getTodayKey() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+}
+
+// Luaiy Nawabit - Calculates the time left until the next midnight reset.
+function getTimeUntilNextReset() {
+    const now = new Date();
+    const nextReset = new Date();
+    nextReset.setHours(24, 0, 0, 0);
+
+    const diff = nextReset - now;
+
+    const hours = String(Math.floor(diff / (1000 * 60 * 60))).padStart(2, '0');
+    const minutes = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+    const seconds = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
+
+    return `${hours}:${minutes}:${seconds}`;
+}
+
+// Luaiy Nawabit - Updates the countdown text shown in the daily quest section.
+function updateDailyResetTimer() {
+    const timerElement = document.getElementById("nextResetTimer");
+    if (!timerElement) return;
+
+    timerElement.textContent = `Next refresh in: ${getTimeUntilNextReset()}`;
+}
+
+// Luaiy Nawabit - Starts one timer and only refreshes the quest list if the date actually changes.
+function startDailyResetTimer() {
+    if (dailyResetTimerInterval) {
+        clearInterval(dailyResetTimerInterval);
+    }
+
+    updateDailyResetTimer();
+
+    dailyResetTimerInterval = setInterval(() => {
+        const currentDateKey = getTodayKey();
+
+        if (dailyQuestData.date !== currentDateKey) {
+            refreshDailyQuests();
+            displayTasks();
+        } else {
+            updateDailyResetTimer();
+        }
+    }, 1000);
+}
+
+// Luaiy Nawabit - Gives older tasks a task id if they were saved before ids were added.
+function ensureTaskIds() {
+    let changed = false;
+
+    tasks.forEach(task => {
+        if (!task.id) {
+            task.id = "task-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+            changed = true;
+        }
+    });
+
+    if (changed) {
+        saveTasks();
+    }
+}
+
 function switchTab(view) {
     currentView = view;
     
-    // Update button styling
+    // Updated button styling
     document.getElementById('tabActive').classList.toggle('active', view === 'active');
+    document.getElementById('tabDaily').classList.toggle('active', view === 'daily');
     document.getElementById('tabArchive').classList.toggle('active', view === 'archive');
+
+    // Luaiy Nawabit - Only show the quest summary panel when the Daily Quests tab is active (as per Zack's request :)
+    document.getElementById('questPanel').style.display = view === 'daily' ? 'block' : 'none';
     
     displayTasks();
 }
@@ -224,6 +464,8 @@ function addTask() {
     } // if text, date, OR priority field are empty, user is told to do it correctly
 
     tasks.push({
+        // Luaiy Nawabit - Each task has its own id so quests can link back to the correct task.
+        id: "task-" + Date.now() + "-" + Math.random().toString(16).slice(2),
         text: text,
         date: date,
         priority: parseInt(priority),
@@ -255,9 +497,7 @@ function sortTasks() {
 } // code to sort the tasks
 
 // changes the sort mode
-function toggleSortMode() {
-    const button = event.target;
-
+function toggleSortMode(button) {
     if (sortMode === "date") {
         sortMode = "priority";
         button.textContent = "Sort By: Priority";
@@ -278,24 +518,335 @@ function toggleSort() {
 
 
 function saveTasks() {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
+    localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(tasks));
+}
+
+function saveQuestPoints() {
+    localStorage.setItem(QUEST_POINTS_STORAGE_KEY, JSON.stringify(questPoints));
+}
+
+function loadQuestPoints() {
+    const storedPoints = localStorage.getItem(QUEST_POINTS_STORAGE_KEY);
+
+    if (storedPoints) {
+        questPoints = JSON.parse(storedPoints);
+    } else {
+        questPoints = 0;
+    }
+}
+
+function saveQuestXPData() {
+    // Luaiy Nawabit - Saves level progress so xp and levels stay after closing the app
+    localStorage.setItem(QUEST_XP_STORAGE_KEY, JSON.stringify(questXPData));
+}
+
+function loadQuestXPData() {
+    const storedXPData = localStorage.getItem(QUEST_XP_STORAGE_KEY);
+
+    if (storedXPData) {
+        const parsedXPData = JSON.parse(storedXPData);
+
+        questXPData = {
+            level: Number(parsedXPData.level) || 1,
+            currentXP: Number(parsedXPData.currentXP) || 0,
+            totalXP: Number(parsedXPData.totalXP) || 0
+        };
+    } else {
+        questXPData = {
+            level: 1,
+            currentXP: 0,
+            totalXP: 0
+        };
+    }
+}
+
+function saveDailyQuestData() {
+    localStorage.setItem(DAILY_QUESTS_STORAGE_KEY, JSON.stringify(dailyQuestData));
+}
+
+function loadDailyQuestData() {
+    const storedDailyQuestData = localStorage.getItem(DAILY_QUESTS_STORAGE_KEY);
+
+    if (storedDailyQuestData) {
+        const parsedDailyQuestData = JSON.parse(storedDailyQuestData);
+
+        dailyQuestData = {
+            date: parsedDailyQuestData.date || "",
+            bonusAwarded: !!parsedDailyQuestData.bonusAwarded,
+            quests: (parsedDailyQuestData.quests || []).map(quest => {
+                const matchingTask = tasks.find(task => task.id === quest.taskId);
+
+                return {
+                    taskId: quest.taskId,
+                    pointsAwarded: Number(quest.pointsAwarded) || (matchingTask ? getPointsForPriority(matchingTask.priority) : 0),
+                    xpAwarded: Number(quest.xpAwarded) || (matchingTask ? getXPForPriority(matchingTask.priority) : 0),
+                    completed: !!quest.completed,
+                    rewardClaimed: !!quest.rewardClaimed
+                };
+            })
+        };
+    } else {
+        dailyQuestData = {
+            date: "",
+            quests: [],
+            bonusAwarded: false
+        };
+    }
 }
 
 function loadTasks() {
-    const storedTasks = localStorage.getItem("tasks");
+    const storedTasks = localStorage.getItem(TASKS_STORAGE_KEY);
 
     if (storedTasks) {
         tasks = JSON.parse(storedTasks);
     }
 
+    ensureTaskIds();
+    loadQuestPoints();
+    loadQuestXPData();
+    loadDailyQuestData();
+    refreshDailyQuests();
     sortTasks();
     displayTasks();
 }
 
+// Luaiy Nawabit - Point rewards are tied to task priority --> higher priority work feels more valuable/ has greater completion incentive
+function getPointsForPriority(priority) {
+    if (priority >= 8) return 20;
+    if (priority >= 4) return 10;
+    return 5;
+}
+
+// Luaiy Nawabit - xp is a little higher than points this can be change dbut I'm modelling it off For Honor (unfortunately)
+function getXPForPriority(priority) {
+    if (priority >= 8) return 35;
+    if (priority >= 4) return 20;
+    return 10;
+}
+
+// Luaiy Nawabit - Each level takes more xp than the last one (can be changed but I find this more common in games)
+function getXPNeededForLevel(level) {
+    return 100 + ((level - 1) * 50);
+}
+
+// Luaiy Nawabit - titles are based on level ranges so the title system still works even at very high levels (can change these if you want)
+function getTitleForLevel(level) {
+    if (level >= 500) return "Eternal Ascended Strategist";
+    if (level >= 250) return "Mythic Ascended Strategist";
+    if (level >= 100) return "Ascended Strategist";
+    if (level >= 75) return "Legendary Organizer";
+    if (level >= 50) return "Elite Tactician";
+    if (level >= 35) return "Productivity Master";
+    if (level >= 20) return "Quest Keeper";
+    if (level >= 10) return "Organizer";
+    if (level >= 5) return "Task Runner";
+    return "Beginner";
+}
+
+// Luaiy Nawabit - Adds xp, levels the user up if needed, and keeps leftover XP toward the next level 
+function awardXP(amount) {
+    questXPData.totalXP += amount;
+    questXPData.currentXP += amount;
+
+    while (questXPData.currentXP >= getXPNeededForLevel(questXPData.level)) {
+        questXPData.currentXP -= getXPNeededForLevel(questXPData.level);
+        questXPData.level += 1;
+    }
+
+    saveQuestXPData();
+}
+
+// Luaiy Nawabit - Returns unfinished tasks only. higher priority tasks first and earlier dates breaking ties
+function getEligibleQuestTasks() {
+    return tasks
+        .filter(task => !task.completed)
+        .slice()
+        .sort((a, b) => {
+            if (b.priority !== a.priority) return b.priority - a.priority;
+            return new Date(a.date) - new Date(b.date);
+        });
+}
+
+// Luaiy Nawabit - Creates a quest record from a task and stores its rewards and reward state
+function createQuestFromTask(task) {
+    return {
+        taskId: task.id,
+        pointsAwarded: getPointsForPriority(task.priority),
+        xpAwarded: getXPForPriority(task.priority),
+        completed: !!task.completed,
+        rewardClaimed: false
+    };
+}
+
+// Luaiy Nawabit - Generates MAX three daily quests from the best unfinished tasks (no farming here son)
+function generateDailyQuests() {
+    const eligibleTasks = getEligibleQuestTasks().slice(0, DAILY_QUEST_COUNT);
+
+    dailyQuestData = {
+        date: getTodayKey(),
+        quests: eligibleTasks.map(task => createQuestFromTask(task)),
+        bonusAwarded: false
+    };
+
+    saveDailyQuestData();
+}
+
+// Luaiy Nawabit - Keeps quests stable for the day and only replaces quests if a linked task was deleted.
+function refreshDailyQuests() {
+    const todayKey = getTodayKey();
+
+    // Luaiy Nawabit - New day = a completely new set of daily quests
+    if (dailyQuestData.date !== todayKey) {
+        generateDailyQuests();
+        syncDailyQuestProgress();
+        return;
+    }
+
+    // Luaiy Nawabit - Keeps the same quests during the day unless one no longer exists.
+    const existingTaskIds = tasks.map(task => task.id);
+    const originalLength = dailyQuestData.quests.length;
+
+    dailyQuestData.quests = dailyQuestData.quests.filter(quest =>
+        existingTaskIds.includes(quest.taskId)
+    );
+
+    // Luaiy Nawabit - If a quest task was deleted, fill the empty spot with another unfinished task not already in the quest list.
+    if (dailyQuestData.quests.length < originalLength) {
+        const currentQuestIds = dailyQuestData.quests.map(quest => quest.taskId);
+        const replacementTasks = getEligibleQuestTasks().filter(task => !currentQuestIds.includes(task.id));
+
+        while (dailyQuestData.quests.length < DAILY_QUEST_COUNT && replacementTasks.length > 0) {
+            const nextTask = replacementTasks.shift();
+            dailyQuestData.quests.push(createQuestFromTask(nextTask));
+        }
+    }
+
+    syncDailyQuestProgress();
+}
+
+// Luaiy Nawabit - Syncs quest completion with the real task list and gives points/Xp only once per completion.
+function syncDailyQuestProgress() {
+    dailyQuestData.quests.forEach(quest => {
+        const matchingTask = tasks.find(task => task.id === quest.taskId);
+
+        if (!matchingTask) return;
+
+        if (matchingTask.completed && !quest.completed) {
+            quest.completed = true;
+
+            if (!quest.rewardClaimed) {
+                questPoints += quest.pointsAwarded;
+                awardXP(quest.xpAwarded);
+                quest.rewardClaimed = true;
+            }
+        } else if (!matchingTask.completed && quest.completed) {
+            quest.completed = false;
+
+            // Luaiy Nawabit - If a quest task is restored, only the points are removed.
+            // Luaiy Nawabit - xp and levels stay permanent because x[] is meant to represent lifetime progress.
+            if (quest.rewardClaimed) {
+                questPoints -= quest.pointsAwarded;
+                quest.rewardClaimed = false;
+            }
+        }
+    });
+
+    // Luaiy Nawabit - bonus that happens ONLY once when all 3 daily quests are complete.
+    const hasThreeQuests = dailyQuestData.quests.length === DAILY_QUEST_COUNT;
+    const allComplete = hasThreeQuests && dailyQuestData.quests.every(quest => quest.completed);
+
+    if (allComplete && !dailyQuestData.bonusAwarded) {
+        questPoints += DAILY_FULL_CLEAR_BONUS_POINTS;
+        awardXP(DAILY_FULL_CLEAR_BONUS_XP);
+        dailyQuestData.bonusAwarded = true;
+    } else if (!allComplete && dailyQuestData.bonusAwarded) {
+        // Luaiy Nawabit - If one quest is restored the point bonus is removed but the XP stays permanent (might change but i feel like removing it is too harsh)
+        questPoints -= DAILY_FULL_CLEAR_BONUS_POINTS;
+        dailyQuestData.bonusAwarded = false;
+    }
+
+    saveQuestPoints();
+    saveDailyQuestData();
+}
+
+// Luaiy Nawabit - Replaces one unfinished quest with another unfinished task if the user has enough points.
+function rerollDailyQuest() {
+    refreshDailyQuests();
+
+    if (questPoints < DAILY_REROLL_COST) {
+        alert("Not enough points to reroll a daily quest.");
+        return;
+    }
+
+    const unfinishedQuest = dailyQuestData.quests.find(quest => !quest.completed);
+
+    if (!unfinishedQuest) {
+        alert("All current daily quests are already complete.");
+        return;
+    }
+
+    const currentQuestIds = dailyQuestData.quests.map(quest => quest.taskId);
+
+    const replacementTask = getEligibleQuestTasks().find(task =>
+        !currentQuestIds.includes(task.id)
+    );
+
+    if (!replacementTask) {
+        alert("No other eligible tasks are available to reroll into a new quest.");
+        return;
+    }
+
+    questPoints -= DAILY_REROLL_COST;
+
+    const questIndex = dailyQuestData.quests.findIndex(quest => quest.taskId === unfinishedQuest.taskId);
+    dailyQuestData.quests[questIndex] = createQuestFromTask(replacementTask);
+
+    // Luaiy Nawabit - Rechecks the bonus after a reroll keeps the daily reward accurate.
+    dailyQuestData.bonusAwarded = false;
+
+    saveQuestPoints();
+    saveDailyQuestData();
+    syncDailyQuestProgress();
+    displayTasks();
+}
+
+// Luaiy Nawabit - Updates the statisticles shown at the top of the Daily Quests tab.
+function updateQuestPanel() {
+    document.getElementById("pointsDisplay").textContent = questPoints;
+
+    document.getElementById("levelDisplay").textContent = questXPData.level;
+    document.getElementById("levelTitleDisplay").textContent = getTitleForLevel(questXPData.level);
+
+    const xpNeeded = getXPNeededForLevel(questXPData.level);
+    document.getElementById("xpTextDisplay").textContent = `${Number(questXPData.currentXP) || 0} / ${xpNeeded} XP`;
+
+    const xpPercent = xpNeeded > 0 ? Math.min(((Number(questXPData.currentXP) || 0) / xpNeeded) * 100, 100) : 0;
+    document.getElementById("xpBarFill").style.width = `${xpPercent}%`;
+
+    const completedCount = dailyQuestData.quests.filter(quest => quest.completed).length;
+    document.getElementById("questProgressText").textContent =
+        `${completedCount} / ${dailyQuestData.quests.length} quests completed today`;
+
+    document.getElementById("bonusStatus").textContent = dailyQuestData.bonusAwarded
+        ? `Full clear bonus earned: +${DAILY_FULL_CLEAR_BONUS_POINTS} points and +${DAILY_FULL_CLEAR_BONUS_XP} XP`
+        : `Complete all 3 quests for +${DAILY_FULL_CLEAR_BONUS_POINTS} points and +${DAILY_FULL_CLEAR_BONUS_XP} XP`;
+
+    const rerollButton = document.getElementById("rerollBtn");
+    rerollButton.disabled = questPoints < DAILY_REROLL_COST;
+    document.getElementById("rerollNote").textContent =
+        questPoints >= DAILY_REROLL_COST
+            ? "Replace one unfinished daily quest."
+            : `You need ${DAILY_REROLL_COST - questPoints} more points to reroll.`;
+
+    updateDailyResetTimer();
+}
 
 function displayTasks() { // there are a lot of things in this function that are explained in-line
     const list = document.getElementById("taskList");
     list.innerHTML = "";
+
+    refreshDailyQuests();
+    updateQuestPanel();
 
     const now = new Date();
     const today = new Date();
@@ -304,8 +855,58 @@ function displayTasks() { // there are a lot of things in this function that are
     // Filter the tasks based on the tab
     const filteredTasks = tasks.filter(task => {
         if (currentView === 'active') return !task.completed;
-        return task.completed;
+        if (currentView === 'archive') return task.completed;
+        return false;
     });
+
+    // Luaiy Nawabit - The Daily Quests tab uses the same list area, but it shows only the quests chosen for today.
+    if (currentView === 'daily') {
+        if (dailyQuestData.quests.length === 0) {
+            const li = document.createElement("li");
+            li.innerHTML = `
+                <strong>No daily quests available yet.</strong>
+                <small>Add some unfinished tasks and daily quests will be generated automatically.</small>
+            `;
+            list.appendChild(li);
+            return;
+        }
+
+        dailyQuestData.quests.forEach((quest, questIndex) => {
+            const task = tasks.find(taskItem => taskItem.id === quest.taskId);
+
+            if (!task) return;
+
+            const li = document.createElement("li");
+            const taskDate = new Date(task.date);
+            const taskDay = new Date(taskDate);
+            taskDay.setHours(0,0,0,0);
+
+            if (taskDate < now && !task.completed) li.classList.add("overdue");
+            else if (taskDay.getTime() === today.getTime() && !task.completed) {
+                li.classList.add("due-today");
+            }
+
+            if (task.completed) li.classList.add("completed");
+
+            li.innerHTML = `
+                <strong>Quest ${questIndex + 1}: ${task.text}</strong>
+                <small>Priority: ${task.priority} | Due: ${taskDate.toLocaleString()}</small>
+                <div class="quest-rewards">
+                    <span>+${quest.pointsAwarded} points</span>
+                    <span>+${Number(quest.xpAwarded) || 0} XP</span>
+                </div>
+                <div class="task-controls">
+                    <button class="complete-btn" onclick="toggleCompleteByTaskId('${task.id}')">
+                        ${task.completed ? 'Restore' : 'Complete'}
+                    </button>
+                </div>
+            `;
+
+            list.appendChild(li);
+        });
+
+        return;
+    }
 
     filteredTasks.forEach((task) => { //specifics per task
 
@@ -357,6 +958,21 @@ function displayTasks() { // there are a lot of things in this function that are
 function toggleComplete(index) {
     tasks[index].completed = !tasks[index].completed;
     saveTasks();
+
+    // Luaiy Nawabit - After a task changes state, the quest system needs to recheck rewards and bonus progress.
+    syncDailyQuestProgress();
+    displayTasks();
+}
+
+// Luaiy Nawabit - Daily quest buttons use task ids directly instead of the filtered array index.
+function toggleCompleteByTaskId(taskId) {
+    const taskIndex = tasks.findIndex(task => task.id === taskId);
+
+    if (taskIndex === -1) return;
+
+    tasks[taskIndex].completed = !tasks[taskIndex].completed;
+    saveTasks();
+    syncDailyQuestProgress();
     displayTasks();
 }
 
@@ -368,12 +984,18 @@ function deleteTask(index) {
     if (userConfirmed) {
         tasks.splice(index, 1);
         saveTasks();
+
+        // Luaiy Nawabit - Deleting a task can possibly remove one of todays quests, so the quest list must refresh after deletion.
+        refreshDailyQuests();
         displayTasks();
     }
     // If they click "Cancel", nothing happens!
 }
 
-window.onload = loadTasks;
+window.onload = function () {
+    loadTasks();
+    startDailyResetTimer();
+};
 
 </script>
 
