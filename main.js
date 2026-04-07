@@ -4,6 +4,12 @@ const Database = require('better-sqlite3');
 
 let db;
 
+/*
+  Lou: Correction
+  Added this variable to keep track of the child window so multiple dont open
+*/
+let childWindow = null;
+
 const createWindow = () => {
   const win = new BrowserWindow({
     width: 800,
@@ -24,9 +30,25 @@ const createWindow = () => {
 }
 
 //Child window --> Each child window gets its own renderer process (multiple tabs)
-function createChildWindow(parentwin) {
+function createChildWindow(parentWin) {
 
-  const child = new BrowserWindow({
+  /*
+    Lou: Correction
+    If the child window already exists, focus it instead of creating another one.
+  */
+  if (childWindow) {
+    childWindow.focus()
+    return
+  }
+
+  /*
+    Lou: Correction
+    Changed "child" to "childWindow" so we to track it globally
+  */
+  childWindow = new BrowserWindow({
+
+    
+    
     parent: parentWin,    //makes it a child of the parent
     modal:false,          //if set to true it prevents action on parent window until some task is completed
     width: 500,
@@ -40,8 +62,15 @@ function createChildWindow(parentwin) {
   })
 
   //loads a different page for the chidl processes
-  child.loadFile('child.html')
+  childWindow.loadFile('child.html')
 
+  /*
+    Lou: Correction
+    Reset childWindow when it's closed so it can be reopened later (this had nothing to do with our problem but it needed fixing anyweays)
+  */
+  childWindow.on('closed', () => {
+    childWindow = null
+  })
 }
 
 app.whenReady().then(() => {
