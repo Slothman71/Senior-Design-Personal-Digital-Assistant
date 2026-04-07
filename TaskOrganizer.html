@@ -711,7 +711,8 @@ function refreshDailyQuests() {
     );
 
     // Luaiy Nawabit - If a quest task was deleted, fill the empty spot with another unfinished task not already in the quest list.
-    if (dailyQuestData.quests.length < originalLength) {
+    //Lou Correction: changed line from < originalLength to < DAILY_QUEST_COUNT to autopopulate tasks if theyw were added later in the day
+    if (dailyQuestData.quests.length < DAILY_QUEST_COUNT) {
         const currentQuestIds = dailyQuestData.quests.map(quest => quest.taskId);
         const replacementTasks = getEligibleQuestTasks().filter(task => !currentQuestIds.includes(task.id));
 
