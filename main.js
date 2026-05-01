@@ -29,6 +29,7 @@ const createWindow = () => {
   return win
 }
 
+/*
 //Child window --> Each child window gets its own renderer process (multiple tabs)
 function createChildWindow(parentWin) {
 
@@ -44,7 +45,7 @@ function createChildWindow(parentWin) {
   /*
     Lou: Correction
     Changed "child" to "childWindow" so we to track it globally
-  */
+  
   childWindow = new BrowserWindow({
 
     
@@ -63,15 +64,17 @@ function createChildWindow(parentWin) {
 
   //loads a different page for the chidl processes
   childWindow.loadFile('child.html')
+  
 
   /*
     Lou: Correction
     Reset childWindow when it's closed so it can be reopened later (this had nothing to do with our problem but it needed fixing anyweays)
-  */
+  
   childWindow.on('closed', () => {
     childWindow = null
   })
 }
+*/
 
 app.whenReady().then(() => {
   const dbPath = path.join(app.getPath('userData'), 'app.db');
@@ -127,7 +130,7 @@ ipcMain.on('close-app', () => {
 ipcMain.handle('open-child-window', (event) => {    //handles renderer request to open child window
   const parentWin = BrowserWindow.fromWebContents(event.sender) //finds which window made request
   if (parentWin) {            //if parent window is found
-    createChildWindow(parentWin)    //create + attach child window to it
+    //createChildWindow(parentWin)    //create + attach child window to it
   }
   return true
 })
